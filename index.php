@@ -1,15 +1,41 @@
 <?php
-date_default_timezone_set('Africa/Lagos');
-$client = new SoapClient('https://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx?WSDL');
- 
-try {
+require_once 'config.php'; 
+spl_autoload_register(function ($class_name) 
+{
+    require_once 'libs/'.$class_name . '.php';
+});
 
-    // print_r($client->__getFunctions());
-    $params["On_date"] = date("Y-m-d"); 
-    $res = $client->GetCursOnDate($params);
-    $movies = new SimpleXMLElement($res->GetCursOnDateResult->any
-);
-print_r($movies->ValuteData->ValuteCursOnDate[0]->Vname);
-} catch (SoapFault $fault) {
-      echo "Error: " . $fault->faultcode . ": " . $fault->getMessage() . "\n";
+try 
+{
+	if ($_SERVER['REQUEST_METHOD'] === 'POST') 
+	{
+		if (!empty($_POST['type'])) 
+		{
+			switch ($_POST['type']) 
+			{
+				case 'soap':
+					$obj = new SoapCbr();
+					break;
+				case 'curl':
+					$obj = new CurlCbr();
+					break;
+			}
+			$curs = $obj->GetCursOnDate();
+		}
+		else
+		{
+			throw new Exception('Choose type');
+		}
+	}
+
+} 
+catch (SoapFault $fault) 
+{
+    $error = "Error: " . $fault->faultcode . ": " . $fault->getMessage() . "\n";
 }
+catch (Exception $e) 
+{ 
+    $error = "Error: " . $e->getMessage();
+}
+
+require_once './templates/index.php';
