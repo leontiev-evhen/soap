@@ -1,4 +1,4 @@
-<?php
+i<?php
 date_default_timezone_set('Africa/Lagos');
 $client = new SoapClient('https://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx?WSDL');
  
